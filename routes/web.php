@@ -22,7 +22,7 @@ Route::middleware('auth')->get('/send-message', function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/send-message', [MessageController::class, 'sendMessage']);
-    Route::get('/messages', [MessageController::class, 'getMessages']);
+    Route::get('/messages/{recipientId}', [MessageController::class, 'getMessages']);
     Route::get('/users', function () {
         return \App\Models\User::where('id', '!=', auth()->id())->get(['id', 'name']);
     });

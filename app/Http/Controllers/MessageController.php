@@ -41,13 +41,29 @@ class MessageController extends Controller
 
 
     // Retrieve messages for the logged-in user
-    public function getMessages()
+    public function getMessages($recipientId)
     {
-        $messages = Message::where('recipient_id', Auth::id())
-            ->orWhere('sender_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json($messages);
+        $messages = Message::where(function ($query) use ($recipientId) {
+            $query->where('recipient_id', Auth::id())
+                  ->where('sender_id', $recipientId);
+        })
+        ->orWhere(function ($query) use ($recipientId) {
+            $query->where('sender_id', Auth::id())
+                  ->where('recipient_id', $recipientId);
+        })
+        ->orderBy('created_at', 'asc')
+        ->get()
+        ->map(function ($message) {
+            $message->sent = $message->sender_id === Auth::id(); // Add `sent` flag
+            $message->file_url = $message->file_path ? asset('storage/' . $message->file_path) : null;
+            return $message;
+        });
+    
+    return response()->json($messages);
+    
     }
 }
+
+
+
+
