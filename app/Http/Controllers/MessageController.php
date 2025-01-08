@@ -23,14 +23,17 @@ class MessageController extends Controller
         $message = new Message();
         $message->sender_id = Auth::id();
         $message->recipient_id = $request->recipient_id;
+        // $message->file_name = $request->$file->getClientOriginalName(); // Save the file name if a file is attached
         $message->encrypted_message = $request->encrypted_message; // Set the message text if provided
 
         // Handle file upload if a file is attached
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $filePath = $file->store('uploads', 'public'); // Save file in the "storage/app/public/uploads" directory
-            $message->file_path = $filePath; // Save the file path in the database
+            $filePath = $file->store('uploads', 'public');
+            $message->file_path = $filePath;
+            $message->file_name = $file->getClientOriginalName(); // Safely retrieve the file name
         }
+        
 
         // Save the message to the database
         $message->save();
